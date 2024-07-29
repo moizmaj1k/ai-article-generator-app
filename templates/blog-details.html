@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Article Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .tab {
+            display: inline-block;
+            margin-left: 1em;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans antialised">
+    <!-- Navbar -->
+    <nav class="bg-indigo-700 p-4 text-white flex justify-between">
+        <div>
+            <a href="/"><h1 class="text-3xl font-bold">AI Article Generator</h1></a>
+        </div>
+        <div>
+            <p><i><b>Welcome {{ user.username }}</b></i></p>
+            <a href="/blog-list" class="text-white hover:underline">Saved Articles<span class="tab"></span></a>
+            <a href="logout" class="text-white hover:underline">Logout</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto mt-10 px-4 sm:px-0">
+        <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md">
+            <section>
+                <h2 class="text-xl mb-4 font-semibold">Article Details</h2>
+                <div class="border border-gray-300 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold">{{blog_article_details.youtube_title}}</h3>
+                    <p class="text-gray-700">{{blog_article_details.generated_content}}</p>
+                    <hr class="my-4 border-gray-300">
+                    <h4 class="text-lg font-semibold">Youtube Video Title</h4>
+                    <p class="text-gray-700">{{blog_article_details.youtube_title}}</p>
+                    <h4 class="text-lg font-semibold mt-4">Youtube Video Link</h4>
+                    <a href="{{blog_article_details.youtube_link}}" class="text-blue-600 hover:underline">{{blog_article_details.youtube_link}}</a>
+                </div>
+            </section>
+        </div>
+     </div>
+
+    <!-- Footer -->
+    <footer class="text-center p-4 text-black mt-6">
+        Developed By Moiz
+    </footer>
+</body>
+</html>
