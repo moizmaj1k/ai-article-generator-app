@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.conf import settings
 import json
 import os
@@ -14,6 +14,8 @@ import assemblyai as aai # type: ignore
 import yt_dlp # type: ignore
 from langchain_ollama import OllamaLLM # type: ignore
 from langchain_core.prompts import ChatPromptTemplate # type: ignore
+from io import BytesIO
+from xhtml2pdf import pisa # type: ignore
 
 # Create your views here.
 
@@ -56,9 +58,70 @@ def generate_blog(request):
         new_blog_article.save()
 
         # return blog article as a response
-        return JsonResponse({'content': blog_content})
+        return JsonResponse({'content': blog_content, 'content_id': new_blog_article.id})
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+def download_pdf(request):
+    try:
+        # Retrieve blog post based on ID from the request
+        content_id = request.GET.get('content_id')
+        blog_article_details = BlogPost.objects.get(id=content_id)
+
+        # Define the HTML content with inline CSS
+        html_content = f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>Youtube Title:{blog_article_details.youtube_title}</title>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    font-size: 12pt;
+                }}
+                h1 {{
+                    font-size: 22pt;
+                    color: #333333;
+                }}
+                p {{
+                    font-size: 12pt;
+                    margin-bottom: 10px;
+                }}
+                .bold {{
+                    font-weight: bold;
+                }}
+                .italic {{
+                    font-style: italic;
+                }}
+                .highlight {{
+                    background-color: yellow;
+                }}
+            </style>
+        </head>
+        <body>
+            <h1>{blog_article_details.youtube_title}</h1>
+            <div>
+                {blog_article_details.generated_content}
+            </div>
+        </body>
+        </html>
+        """
+
+        # Create PDF
+        result = BytesIO()
+        pisa_status = pisa.CreatePDF(BytesIO(html_content.encode('utf-8')), dest=result)
+        
+        if pisa_status.err:
+            return HttpResponse('Error generating PDF', status=500)
+        
+        response = HttpResponse(result.getvalue(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{blog_article_details.youtube_title}.pdf"'
+        return response
+
+    except BlogPost.DoesNotExist:
+        return HttpResponse('Blog post not found', status=404)
+
 
 def yt_title(link):
     yt = YouTube(link)
@@ -114,20 +177,29 @@ def get_transcription(link):
 def generate_blog_from_transcription(transcription):
     try:
         template = '''
-        Question: Based on the following youtube video transcript, write a comprehensive article. The article should be based on the content of the transcript. Make sure to write it in the style of a professional Article. It should be well structured and detailed.
-        
-        Transcript:\n{context}
-        
-        Article:
+        Question: Based on the following YouTube video transcript, write a comprehensive and professional article. The article should be well-structured, detailed, and formatted in HTML. 
+
+        Your response should:
+        - Use HTML tags for headings (e.g., <h1>, <h2>, <h3>), paragraphs (e.g., <p>), bold text (e.g., <strong> or <b>), italic text (e.g., <em> or <i>), line breaks (e.g., <br>), and lists (e.g., <ul>, <li>).
+        - Do not use markdown or other text formatting such as **bold** or *italic*. Only use HTML tags.
+        - Ensure proper nesting of HTML elements.
+        - Do not include any plain text instructions or explanations, just the HTML content.
+
+        Transcript:
+        {context}
+
+        Article (in HTML format):
         '''
         # TODO : Moondream is a vision model, replace this with lamma 3.1 LLM
-        model = OllamaLLM(model="moondream")
+        model = OllamaLLM(model="llama3.1")
         prompt = ChatPromptTemplate.from_template(template)
         chain = prompt | model
         generated_content = chain.invoke({"context": transcription})
         return generated_content
     except Exception as e:
         return str(e)  # Return the exception message for debugging
+
+
 
 def blog_list(request):
     # Get all the generated articles for the current logged in user

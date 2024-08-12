@@ -7,6 +7,7 @@ urlpatterns = [
     path('signup', views.user_signup, name='signup'),
     path('logout', views.user_logout, name='logout'),
     path('generate-blog', views.generate_blog, name='generate-blog'),
+    path('download-pdf/', views.download_pdf, name="download_pdf"),
     path('blog-list', views.blog_list, name='blog-list'),
     path('blog-details/<int:pk>/', views.blog_details, name='blog-details'),
 ]

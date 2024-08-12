@@ -99,6 +99,15 @@
                     <div id="blogContent" class="mt-2 text-gray-700 space-y-4">
                     
                     </div>
+                    <div class="flex justify-center">
+                        <form id="downloadPdfForm" method="GET" action="{% url 'download_pdf' %}">
+                            {% csrf_token %}
+                            <input type="hidden" id="contentId" name="content_id" value="">
+                            <button id="downloadPDF" style="display: none;" class="bg-indigo-400 text-white px-72 py-2 rounded-l-lg rounded-r-lg hover:bg-indigo-500 transition-colors">
+                                Download PDF
+                            </button>
+                        </form>
+                    </div>                                       
                   </section>
             </div>
          </div>
@@ -109,43 +118,54 @@
          </footer>
 
          <!-- Code for generating Article -->
-         <script>
-            document.getElementById('generateBlogButton').addEventListener('click', async () => {
+<script>
+    document.getElementById('generateBlogButton').addEventListener('click', async () => {
+        const youtubeLink = document.getElementById('youtubeLink').value;
+        const blogContent = document.getElementById('blogContent');
+    
+        if (youtubeLink) {
+            document.getElementById('loading-circle').style.display = 'block';
             
-
-                const youtubeLink = document.getElementById('youtubeLink').value;
-                const blogContent = document.getElementById('blogContent');
+            blogContent.innerHTML = ''; // Clear previous content
+    
+            const endpointUrl = '/generate-blog';
+            
+            try {
+                const response = await fetch(endpointUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ link: youtubeLink })
+                });
                 
-                if(youtubeLink) {
-                    document.getElementById('loading-circle').style.display = 'block';
-                    
-                    blogContent.innerHTML = ''; // Clear previous content
+                const data = await response.json();
     
-                    const endpointUrl = '/generate-blog';
-                    
-                    try {
-                        const response = await fetch(endpointUrl, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ link: youtubeLink })
-                        });
+                if (response.ok) {
+                    // Sanitize and ensure the data contains HTML content
+                    const sanitizedContent = DOMPurify.sanitize(data.content);
+                    blogContent.innerHTML = sanitizedContent;
     
-                        const data = await response.json();
+                    // Update the hidden input field and form action URL
+                    const downloadForm = document.getElementById('downloadPdfForm');
+                    document.getElementById('contentId').value = data.content_id; // Set content_id in hidden input
     
-                        blogContent.innerHTML = data.content;
-    
-                    } catch (error) {
-                        console.error("Error occurred:", error);
-                        alert("Something went wrong. Please try again later.");
-                        
-                    }
-                    document.getElementById('loading-circle').style.display = 'none';
+                    // Show the download PDF button
+                    document.getElementById('downloadPDF').style.display = 'block';
                 } else {
-                    alert("Please enter a YouTube link.");
+                    alert("Failed to generate blog. Please try again.");
                 }
-            });
-         </script>
+    
+            } catch (error) {
+                console.error("Error occurred:", error);
+                alert("Something went wrong. Please try again later.");
+            }
+            document.getElementById('loading-circle').style.display = 'none';
+        } else {
+            alert("Please enter a YouTube link.");
+        }
+    });        
+</script>
+         <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.8/purify.min.js"></script>
     </body>
 </html>

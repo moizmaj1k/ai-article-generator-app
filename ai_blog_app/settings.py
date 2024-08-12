@@ -76,28 +76,28 @@ WSGI_APPLICATION = 'ai_blog_app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.sqlite3',
-#        'NAME': BASE_DIR / 'db.sqlite3',
-#    }
-#}
+DATABASES = {
+   'default': {
+       'ENGINE': 'django.db.backends.sqlite3',
+       'NAME': BASE_DIR / 'db.sqlite3',
+   }
+}
 
 '''
     SETTING UP POSTGRESQL DB using Qovery
 
     qoveryadmin:cdd6idtNFCk0XoAu1PhXnoVr-nzXcRK1@z626c434c-postgresql.c3gomaw46p5v.eu-north-1.rds.amazonaws.com:5432
 '''
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'qoveryadmin',
-        'PASSWORD': 'cdd6idtNFCk0XoAu1PhXnoVr-nzXcRK1',
-        'HOST': 'z626c434c-postgresql.c3gomaw46p5v.eu-north-1.rds.amazonaws.com',
-        'PORT': '5432'
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'postgres',
+#         'USER': 'qoveryadmin',
+#         'PASSWORD': '-',
+#         'HOST': '-',
+#         'PORT': '-'
+#     }
+# }
 
 
 # Password validation

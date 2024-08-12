@@ -10,6 +10,23 @@
             display: inline-block;
             margin-left: 1em;
         }
+        .content {
+            white-space: pre-wrap; /* Preserve whitespace and line breaks */
+        }
+    
+        .content p {
+            margin-bottom: 1em; /* Add margin between paragraphs */
+        }
+    
+        .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
+            margin-top: 1em; /* Add margin above headings */
+            margin-bottom: 0.5em; /* Add margin below headings */
+        }
+    
+        .content br {
+            content: "\A"; /* Ensure line breaks are displayed */
+            white-space: pre; /* Preserve line breaks */
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans antialised">
@@ -32,12 +49,22 @@
                 <h2 class="text-xl mb-4 font-semibold">Article Details</h2>
                 <div class="border border-gray-300 p-4 rounded-lg">
                     <h3 class="text-lg font-semibold">{{blog_article_details.youtube_title}}</h3>
-                    <p class="text-gray-700">{{blog_article_details.generated_content}}</p>
+                    <p class="text-gray-700 content">{{blog_article_details.generated_content|safe}}</p>
                     <hr class="my-4 border-gray-300">
                     <h4 class="text-lg font-semibold">Youtube Video Title</h4>
                     <p class="text-gray-700">{{blog_article_details.youtube_title}}</p>
                     <h4 class="text-lg font-semibold mt-4">Youtube Video Link</h4>
                     <a href="{{blog_article_details.youtube_link}}" class="text-blue-600 hover:underline">{{blog_article_details.youtube_link}}</a>
+                    <h4 class="text-lg font-semibold mt-4">Download the Article PDF</h4>
+                    <div class="flex justify-center mt-4">
+                        <form id="downloadPdfForm" method="GET" action="{% url 'download_pdf' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="content_id" value="{{ blog_article_details.id }}">
+                            <button type="submit" class="bg-indigo-400 text-white px-4 py-2 rounded-lg hover:bg-indigo-500 transition-colors">
+                                Download PDF
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </section>
         </div>
